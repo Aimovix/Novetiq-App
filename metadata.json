@@ -1,0 +1,6 @@
+{
+  "name": "Synaptiq",
+  "description": "Autonomous AI Agent with Termux integration",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
