@@ -28,3 +28,11 @@ val Red700 = Color(0xFFB91C1C)
 val Red900 = Color(0xFF7F1D1D)
 
 val BackgroundLight = Color(0xFFF7F9FC)
+
+val Indigo300 = Color(0xFFA5B4FC)
+val Indigo900 = Color(0xFF312E81)
+val Slate700 = Color(0xFF334155)
+val Slate950 = Color(0xFF020617)
+val Amber50 = Color(0xFFFFFBEB)
+val Amber700 = Color(0xFFB45309)
+val Red300 = Color(0xFFFCA5A5)
