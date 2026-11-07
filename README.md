@@ -1,21 +1,65 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Synaptiq
 
-# Run and deploy your AI Studio app
+Autonomer KI-Agent für Android, der Befehle sicher in [Termux](https://termux.dev) ausführt.
+Unterstützt Google Gemini, OpenAI und Anthropic Claude (Cloud) sowie lokale Modelle über
+Ollama direkt auf dem Handy.
 
-This contains everything you need to run your app locally.
+## Funktionen
 
-View your app in AI Studio: https://ai.studio/apps/0f5ba2e4-b1bf-4edf-bf3f-5741d9d4dc42
+- **Echter KI-Chat** mit Gemini, OpenAI, Claude oder einem lokalen Ollama-Modell. Der Anbieter
+  lässt sich jederzeit im Chat wechseln. Der Verlauf wird verschlüsselt gespeichert.
+- **Agenten-Modus**: Die KI schlägt Termux-Befehle vor, sieht deren Ausgabe und arbeitet damit
+  weiter (bis zu 6 Schritte pro Nachricht).
+- **Drei Sicherheitsstufen**
+  - *Level 3 – Sandbox*: nur Text, keine Befehle.
+  - *Level 2 – Überwacht*: jeder Befehl braucht deine Freigabe.
+  - *Level 1 – Autonom*: Lesen/Schreiben läuft automatisch. Löschen und Überschreiben brauchen
+    immer eine doppelte Bestätigung.
+- **Tiefenverteidigung**: Whitelist-Prüfung, keine Shell (Befehle werden direkt ausgeführt, also
+  ist Shell-Injection unmöglich), kein rekursives `rm`, kein `python -c`, kein `find -exec`.
+- **Sichere Schlüssel**: API-Schlüssel liegen AES-256-verschlüsselt im Android Keystore, Backups
+  sind ausgeschlossen, Klartext-HTTP ist nur zum lokalen Ollama-Server erlaubt.
+- Deutsch/Englisch (folgt der Gerätesprache), Hell/Dunkel-Modus.
 
-## Run Locally
+## Voraussetzungen auf dem Handy
 
-**Prerequisites:**  [Android Studio](https://developer.android.com/studio)
+1. **Termux von F-Droid oder GitHub** (die Play-Store-Version ist veraltet).
+2. In der App: Berechtigung *„Befehlsausführung erlauben“* erteilen.
+3. Einmalig in Termux ausführen (die App zeigt die Zeile mit Kopier-Button):
+   ```sh
+   mkdir -p ~/.termux && echo "allow-external-apps=true" >> ~/.termux/termux.properties && termux-reload-settings
+   ```
+4. In der App *„Verbindung testen“* drücken.
 
+### Lokales Modell (optional, offline)
 
-1. Open Android Studio
-2. Select **Open** and choose the directory containing this project
-3. Allow Android Studio to fix any incompatibilities as it imports the project.
-4. Create a file named `.env` in the project directory and set `GEMINI_API_KEY` in that file to your Gemini API key (see `.env.example` for an example)
-5. Remove this line from the app's `build.gradle.kts` file: `signingConfig = signingConfigs.getByName("debugConfig")`
-6. Run the app on an emulator or physical device
+Im Tab *Lokales Modell*: Ollama installieren → Modellserver starten → Modell herunterladen →
+Verbindung testen. Die Termux-Sitzung mit `ollama serve` muss beim Chatten offen bleiben.
+
+## Bauen
+
+Benötigt JDK 17+ und das Android SDK (compileSdk 36.1). Gradle wird über den Wrapper geladen.
+
+```sh
+./gradlew assembleDebug          # Debug-APK: app/build/outputs/apk/debug/
+./gradlew testDebugUnitTest      # Unit- und Robolectric-UI-Tests
+./gradlew lintDebug
+```
+
+Release-Signatur (optional): `KEYSTORE_PATH`, `STORE_PASSWORD`, `KEY_PASSWORD` und optional
+`KEY_ALIAS` setzen. Ohne diese Variablen entsteht ein unsigniertes Release-APK, und Debug-Builds
+nutzen den Standard-Debug-Schlüssel (oder `debug.keystore` im Projektordner, falls vorhanden).
+
+## Projektstruktur
+
+| Datei | Inhalt |
+|---|---|
+| `MainActivity.kt` | Einstieg und Navigation |
+| `SetupScreen.kt` / `ChatScreen.kt` / `SettingsScreen.kt` | Bildschirme |
+| `Components.kt` | Gemeinsame UI (Freigabedialog, Anbieter, lokale Modelle, Termux-Verbindung) |
+| `ChatViewModel.kt` | Agenten-Schleife: Antwort → Befehl → Freigabe → Ausführung → Ausgabe |
+| `AgentProtocol.kt` | System-Prompt und Erkennung von Befehlsvorschlägen |
+| `LlmProvider.kt` | HTTP-Clients für Gemini, OpenAI, Claude und Ollama |
+| `CommandValidator.kt` | Whitelist und Risikoeinstufung |
+| `TermuxBridge.kt` | RUN_COMMAND-Intent und Rückgabe der Ausgabe |
+| `SecurityHelper.kt` | Verschlüsselte Einstellungen |
