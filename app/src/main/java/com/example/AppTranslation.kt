@@ -56,7 +56,7 @@ object Strings {
 
         // Termux missing
         "termux_required" to "Termux is required",
-        "termux_required_desc" to "Synaptiq requires the Termux app as a secure execution environment for local AI commands.\n\nPlease note: The version in the Google Play Store is outdated and no longer works for our purposes. Instead, download Termux from F-Droid or directly via GitHub.",
+        "termux_required_desc" to "Aimovix requires the Termux app as a secure execution environment for local AI commands.\n\nPlease note: The version in the Google Play Store is outdated and no longer works for our purposes. Instead, download Termux from F-Droid or directly via GitHub.",
         "open_fdroid" to "Open via F-Droid",
         "open_github" to "Download via GitHub",
         "check_again" to "I installed Termux – check again",
@@ -74,8 +74,8 @@ object Strings {
         "finish_setup" to "Finish Setup",
         "restart_setup" to "Run setup wizard again",
         "defense_active" to "DEFENSE IN DEPTH ACTIVE",
-        "defense_desc" to "Human-in-the-loop + whitelist validation + no shell execution",
-        "termux_intro" to "Synaptiq sends commands to Termux. These steps are required once so that Termux accepts them.",
+        "defense_desc" to "Human-in-the-loop + whitelist / block list + approval for destructive actions + action log",
+        "termux_intro" to "Aimovix sends commands to Termux. These steps are required once so that Termux accepts them.",
 
         // Cloud API
         "keys_encrypted" to "Keys are stored encrypted on this device (Android Keystore, AES-256) and are only sent to the respective provider.",
@@ -116,7 +116,7 @@ object Strings {
 
         // Termux connection
         "perm_title" to "Allow command execution",
-        "perm_desc" to "Android permission that allows Synaptiq to send commands to Termux.",
+        "perm_desc" to "Android permission that allows Aimovix to send commands to Termux.",
         "grant" to "Grant",
         "app_settings" to "App settings",
         "permission_denied" to "Permission denied. You can grant it later in the app settings.",
@@ -133,7 +133,7 @@ object Strings {
         // Commands & dialogs
         "security_verification" to "Security Verification",
         "ai_wants_execute" to "The AI agent wants to execute the following command in Termux. Please review it carefully:",
-        "setup_wants_execute" to "Synaptiq will run the following setup command in Termux:",
+        "setup_wants_execute" to "Aimovix will run the following setup command in Termux:",
         "risk_label" to "Risk",
         "risk_read" to "read only",
         "risk_write" to "changes files or packages",
@@ -195,6 +195,52 @@ object Strings {
         "err_termux_permission" to "Permission for Termux is missing. Grant it in the settings (Termux section).",
         "err_termux_timeout" to "No answer from Termux. Is \"allow-external-apps=true\" set in Termux?",
         "err_termux_start" to "Termux could not run the command: ",
+
+        // Full autonomy & tools
+        "lvl0_name" to "Level 0: Full autonomy",
+        "lvl0_desc" to "The AI works on its own until the task is done: any shell command (pipes, scripts, package installs), writing files and reading web pages - without asking. Deleting, killing processes, uninstalling and anything that sends data outward still needs your approval. Root, formatting and wiping folders are always blocked.",
+        "risk_external" to "sends data outward or may cost money",
+        "full_auto_title" to "Enable full autonomy?",
+        "full_auto_desc" to "In this level the AI runs shell commands, scripts, package installations and file changes on its own, without asking for each step, until the task is done or the step limit is reached.\n\nStill protected: deleting, moving, killing processes, uninstalling, SMS, calls and uploads always need your approval. Root access, formatting and recursive deletion of home or system folders are always blocked.\n\nRisks: the AI can hallucinate, misunderstand instructions, change files, install packages, cause costs or be manipulated by web pages. Make a backup first. You can stop the agent at any time with the stop button.",
+        "full_auto_check" to "I understand these risks and take full responsibility for all actions the AI performs in this mode.",
+        "full_auto_type" to "Type %s to confirm",
+        "full_auto_enable" to "Enable",
+        "consent_word" to "AGREE",
+        "revoke_full_auto" to "Revoke full autonomy consent",
+        "max_steps" to "Step limit",
+        "max_steps_desc" to "Maximum number of actions the agent may chain for one message before it pauses.",
+        "tool_file" to "File",
+        "tool_web" to "Web",
+        "web_failed" to "Web request failed: ",
+        "file_written" to "File written.",
+        "rej_hard_blocked" to "Always blocked for your safety",
+        "rej_invalid_path" to "Path not allowed (only inside the Termux home or /sdcard)",
+        "rej_invalid_url" to "URL not allowed",
+        "ai_disclaimer_short" to "AI can make mistakes and hallucinate. Check important information and actions.",
+
+        // Legal
+        "consent_title" to "Before you start",
+        "consent_intro" to "Aimovix is an autonomous AI agent that can run commands on your device. Please read the terms and the privacy notice and confirm each point.",
+        "consent_ai_notice" to "You are interacting with an AI. AI can hallucinate: answers and commands can be wrong, made up or harmful even if they sound convincing. The AI is not a substitute for professional advice.",
+        "read_terms" to "Terms & disclaimer",
+        "read_privacy" to "Privacy notice",
+        "consent_adult" to "I am at least 18 years old.",
+        "consent_hallucinations" to "I understand that the AI can hallucinate and make mistakes (wrong, incomplete or invented information, faulty commands) and I check results myself.",
+        "consent_responsibility" to "I am responsible for all actions I approve or that run automatically because of my security level, and I back up important data myself.",
+        "consent_terms" to "I have read and accept the terms of use including the limitation of liability.",
+        "consent_privacy" to "I have read the privacy notice. I know that my inputs are sent to the AI provider I choose.",
+        "decline" to "Decline",
+        "accept_continue" to "Accept & continue",
+        "close" to "Close",
+        "audit_log" to "Action log",
+        "audit_empty" to "No actions recorded yet.",
+        "legal" to "Legal",
+        "consent_given_at" to "Consent given: %s",
+        "withdraw_consent" to "Withdraw consent",
+        "withdraw_consent_desc" to "The app can no longer be used until you accept the terms again. Full autonomy will be turned off. Your data stays on the device.",
+        "withdraw" to "Withdraw",
+        "wipe_all" to "Delete all data",
+        "wipe_all_desc" to "Deletes all API keys, settings, the chat, the action log and your consents from this device. This cannot be undone.",
     )
 
     private val de = mapOf(
@@ -222,7 +268,7 @@ object Strings {
 
         // Termux missing
         "termux_required" to "Termux wird benötigt",
-        "termux_required_desc" to "Synaptiq benötigt die Termux-App als sichere Ausführungsumgebung für lokale KI-Befehle.\n\nBitte beachte: Die Version im Google Play Store ist veraltet und funktioniert nicht mehr für unsere Zwecke. Lade Termux stattdessen von F-Droid oder direkt über GitHub herunter.",
+        "termux_required_desc" to "Aimovix benötigt die Termux-App als sichere Ausführungsumgebung für lokale KI-Befehle.\n\nBitte beachte: Die Version im Google Play Store ist veraltet und funktioniert nicht mehr für unsere Zwecke. Lade Termux stattdessen von F-Droid oder direkt über GitHub herunter.",
         "open_fdroid" to "Über F-Droid öffnen",
         "open_github" to "Über GitHub laden",
         "check_again" to "Termux ist installiert – erneut prüfen",
@@ -240,8 +286,8 @@ object Strings {
         "finish_setup" to "Einrichtung abschließen",
         "restart_setup" to "Einrichtungsassistent erneut starten",
         "defense_active" to "TIEFENVERTEIDIGUNG AKTIV",
-        "defense_desc" to "Mensch-in-der-Schleife + Whitelist-Prüfung + keine Shell-Ausführung",
-        "termux_intro" to "Synaptiq schickt Befehle an Termux. Diese Schritte sind einmalig nötig, damit Termux sie annimmt.",
+        "defense_desc" to "Mensch-in-der-Schleife + Whitelist / Sperrliste + Freigabe für gefährliche Aktionen + Aktionsprotokoll",
+        "termux_intro" to "Aimovix schickt Befehle an Termux. Diese Schritte sind einmalig nötig, damit Termux sie annimmt.",
 
         // Cloud API
         "keys_encrypted" to "Schlüssel werden verschlüsselt auf dem Gerät gespeichert (Android Keystore, AES-256) und nur an den jeweiligen Anbieter gesendet.",
@@ -282,7 +328,7 @@ object Strings {
 
         // Termux connection
         "perm_title" to "Befehlsausführung erlauben",
-        "perm_desc" to "Android-Berechtigung, mit der Synaptiq Befehle an Termux senden darf.",
+        "perm_desc" to "Android-Berechtigung, mit der Aimovix Befehle an Termux senden darf.",
         "grant" to "Erlauben",
         "app_settings" to "App-Einstellungen",
         "permission_denied" to "Berechtigung verweigert. Du kannst sie später in den App-Einstellungen erteilen.",
@@ -299,7 +345,7 @@ object Strings {
         // Commands & dialogs
         "security_verification" to "Sicherheitsüberprüfung",
         "ai_wants_execute" to "Der KI-Agent möchte folgenden Befehl in Termux ausführen. Bitte prüfe ihn sorgfältig:",
-        "setup_wants_execute" to "Synaptiq führt folgenden Einrichtungsbefehl in Termux aus:",
+        "setup_wants_execute" to "Aimovix führt folgenden Einrichtungsbefehl in Termux aus:",
         "risk_label" to "Risiko",
         "risk_read" to "nur lesen",
         "risk_write" to "ändert Dateien oder Pakete",
@@ -361,5 +407,51 @@ object Strings {
         "err_termux_permission" to "Die Berechtigung für Termux fehlt. Erteile sie in den Einstellungen (Abschnitt Termux).",
         "err_termux_timeout" to "Keine Antwort von Termux. Ist \"allow-external-apps=true\" in Termux gesetzt?",
         "err_termux_start" to "Termux konnte den Befehl nicht ausführen: ",
+
+        // Full autonomy & tools
+        "lvl0_name" to "Level 0: Volle Autonomie",
+        "lvl0_desc" to "Die KI arbeitet selbstständig, bis die Aufgabe erledigt ist: beliebige Shell-Befehle (Pipes, Skripte, Paketinstallationen), Dateien schreiben und Webseiten lesen - ohne Rückfrage. Löschen, Prozesse beenden, Deinstallieren und alles, was Daten nach außen sendet, braucht weiterhin deine Freigabe. Root, Formatieren und Ordner-Löschen sind immer gesperrt.",
+        "risk_external" to "sendet Daten nach außen oder kann Kosten verursachen",
+        "full_auto_title" to "Volle Autonomie aktivieren?",
+        "full_auto_desc" to "In dieser Stufe führt die KI Shell-Befehle, Skripte, Paketinstallationen und Dateiänderungen selbstständig aus, ohne jeden Schritt einzeln zu fragen, bis die Aufgabe erledigt oder das Schrittlimit erreicht ist.\n\nWeiterhin geschützt: Löschen, Verschieben, Prozesse beenden, Deinstallieren, SMS, Anrufe und Uploads brauchen immer deine Freigabe. Root-Rechte, Formatieren und rekursives Löschen von Home- oder Systemordnern sind immer gesperrt.\n\nRisiken: Die KI kann halluzinieren, Anweisungen falsch verstehen, Dateien verändern, Pakete installieren, Kosten verursachen oder durch Webseiten manipuliert werden. Erstelle vorher ein Backup. Mit der Stopp-Taste kannst du den Agenten jederzeit anhalten.",
+        "full_auto_check" to "Ich habe diese Risiken verstanden und übernehme die volle Verantwortung für alle Aktionen, die die KI in diesem Modus ausführt.",
+        "full_auto_type" to "Tippe %s zur Bestätigung",
+        "full_auto_enable" to "Aktivieren",
+        "consent_word" to "ZUSTIMMEN",
+        "revoke_full_auto" to "Zustimmung zur vollen Autonomie widerrufen",
+        "max_steps" to "Schrittlimit",
+        "max_steps_desc" to "Maximale Anzahl an Aktionen, die der Agent pro Nachricht hintereinander ausführen darf, bevor er pausiert.",
+        "tool_file" to "Datei",
+        "tool_web" to "Web",
+        "web_failed" to "Webabruf fehlgeschlagen: ",
+        "file_written" to "Datei geschrieben.",
+        "rej_hard_blocked" to "Zu deiner Sicherheit immer gesperrt",
+        "rej_invalid_path" to "Pfad nicht erlaubt (nur im Termux-Home oder unter /sdcard)",
+        "rej_invalid_url" to "URL nicht erlaubt",
+        "ai_disclaimer_short" to "KI kann Fehler machen und halluzinieren. Prüfe wichtige Informationen und Aktionen.",
+
+        // Legal
+        "consent_title" to "Bevor du startest",
+        "consent_intro" to "Aimovix ist ein autonomer KI-Agent, der Befehle auf deinem Gerät ausführen kann. Bitte lies die Nutzungsbedingungen und die Datenschutzhinweise und bestätige jeden Punkt.",
+        "consent_ai_notice" to "Du interagierst mit einer KI. KI kann halluzinieren: Antworten und Befehle können falsch, erfunden oder schädlich sein, auch wenn sie überzeugend klingen. Die KI ersetzt keine fachliche Beratung.",
+        "read_terms" to "Nutzungsbedingungen",
+        "read_privacy" to "Datenschutz",
+        "consent_adult" to "Ich bin mindestens 18 Jahre alt.",
+        "consent_hallucinations" to "Mir ist bewusst, dass die KI halluzinieren und Fehler machen kann (falsche, unvollständige oder erfundene Informationen, fehlerhafte Befehle), und ich prüfe Ergebnisse selbst.",
+        "consent_responsibility" to "Ich bin für alle Aktionen verantwortlich, die ich freigebe oder die wegen meiner Sicherheitsstufe automatisch laufen, und sichere wichtige Daten selbst.",
+        "consent_terms" to "Ich habe die Nutzungsbedingungen einschließlich der Haftungsbeschränkung gelesen und akzeptiere sie.",
+        "consent_privacy" to "Ich habe die Datenschutzhinweise gelesen. Mir ist bewusst, dass meine Eingaben an den von mir gewählten KI-Anbieter übertragen werden.",
+        "decline" to "Ablehnen",
+        "accept_continue" to "Akzeptieren & weiter",
+        "close" to "Schließen",
+        "audit_log" to "Aktionsprotokoll",
+        "audit_empty" to "Noch keine Aktionen aufgezeichnet.",
+        "legal" to "Rechtliches",
+        "consent_given_at" to "Zustimmung erteilt: %s",
+        "withdraw_consent" to "Zustimmung widerrufen",
+        "withdraw_consent_desc" to "Die App kann erst wieder genutzt werden, wenn du den Bedingungen erneut zustimmst. Die volle Autonomie wird ausgeschaltet. Deine Daten bleiben auf dem Gerät.",
+        "withdraw" to "Widerrufen",
+        "wipe_all" to "Alle Daten löschen",
+        "wipe_all_desc" to "Löscht alle API-Schlüssel, Einstellungen, den Chat, das Aktionsprotokoll und deine Zustimmungen von diesem Gerät. Das kann nicht rückgängig gemacht werden.",
     )
 }

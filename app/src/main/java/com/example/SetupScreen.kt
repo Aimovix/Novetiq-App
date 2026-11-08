@@ -195,10 +195,10 @@ fun AppHeader(onOpenSettings: (() -> Unit)?) {
                 modifier = Modifier.size(40.dp).background(MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.small),
                 contentAlignment = Alignment.Center,
             ) {
-                Text("S", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                Text("A", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
             }
             Column(modifier = Modifier.weight(1f)) {
-                Text("Synaptiq", fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+                Text("Aimovix", fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Box(modifier = Modifier.size(7.dp).background(com.example.ui.theme.Green500, shape = CircleShape))
                     Text(trans("secure_path"), fontSize = 11.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.secondary)

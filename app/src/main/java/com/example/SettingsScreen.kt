@@ -43,12 +43,19 @@ fun SettingsScreen(
     onRestartSetup: () -> Unit,
     onClearChat: () -> Unit,
     onBack: () -> Unit,
+    onConsentWithdrawn: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     BackHandler(onBack = onBack)
     // Bumped whenever a provider changes so the "active model" list recomposes.
     var revision by remember { mutableIntStateOf(0) }
     var confirmClear by remember { mutableStateOf(false) }
+    var openDoc by remember { mutableStateOf<LegalTexts.Doc?>(null) }
+    var showAudit by remember { mutableStateOf(false) }
+    var confirmWithdraw by remember { mutableStateOf(false) }
+    var confirmWipe by remember { mutableStateOf(false) }
+    var levelRevision by remember { mutableIntStateOf(0) }
+    var fullAutoConsent by remember { mutableStateOf(settings.hasFullAutonomyConsent()) }
 
     Column(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 1.dp) {
@@ -94,7 +101,22 @@ fun SettingsScreen(
             }
 
             SectionTitle(trans("sec_level_title"))
-            SecurityLevelSelector(settings)
+            androidx.compose.runtime.key(levelRevision) {
+                SecurityLevelSelector(settings, onChanged = { fullAutoConsent = settings.hasFullAutonomyConsent() })
+            }
+            if (fullAutoConsent) {
+                OutlinedButton(
+                    onClick = {
+                        settings.revokeFullAutonomyConsent()
+                        fullAutoConsent = false
+                        levelRevision++
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text(trans("revoke_full_auto")) }
+            }
+
+            SectionTitle(trans("max_steps"))
+            SectionCard { MaxStepsSelector(settings) }
 
             SectionTitle(trans("cloud_api"))
             CloudApiSection(settings, onChanged = { revision++ })
@@ -113,10 +135,39 @@ fun SettingsScreen(
                 OutlinedButton(onClick = onRestartSetup, modifier = Modifier.fillMaxWidth()) {
                     Text(trans("restart_setup"))
                 }
+                OutlinedButton(onClick = { showAudit = true }, modifier = Modifier.fillMaxWidth()) {
+                    Text(trans("audit_log"))
+                }
+            }
+
+            SectionTitle(trans("legal"))
+            SectionCard {
+                OutlinedButton(onClick = { openDoc = LegalTexts.Doc.TERMS }, modifier = Modifier.fillMaxWidth()) {
+                    Text(trans("read_terms"))
+                }
+                OutlinedButton(onClick = { openDoc = LegalTexts.Doc.PRIVACY }, modifier = Modifier.fillMaxWidth()) {
+                    Text(trans("read_privacy"))
+                }
+                settings.legalAcceptedAt()?.let { at ->
+                    val time = remember(at) {
+                        java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.MEDIUM, java.text.DateFormat.SHORT).format(java.util.Date(at))
+                    }
+                    Text(
+                        trans("consent_given_at").format(time),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+                }
+                OutlinedButton(onClick = { confirmWithdraw = true }, modifier = Modifier.fillMaxWidth()) {
+                    Text(trans("withdraw_consent"), color = MaterialTheme.colorScheme.error)
+                }
+                OutlinedButton(onClick = { confirmWipe = true }, modifier = Modifier.fillMaxWidth()) {
+                    Text(trans("wipe_all"), color = MaterialTheme.colorScheme.error)
+                }
             }
 
             Text(
-                "Synaptiq ${BuildConfig.VERSION_NAME}",
+                "Aimovix ${BuildConfig.VERSION_NAME}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -136,6 +187,42 @@ fun SettingsScreen(
                 }) { Text(trans("clear"), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = { TextButton(onClick = { confirmClear = false }) { Text(trans("cancel")) } },
+        )
+    }
+
+    openDoc?.let { LegalDocDialog(it, onDismiss = { openDoc = null }) }
+    if (showAudit) AuditLogDialog(settings, onDismiss = { showAudit = false })
+
+    if (confirmWithdraw) {
+        AlertDialog(
+            onDismissRequest = { confirmWithdraw = false },
+            title = { Text(trans("withdraw_consent")) },
+            text = { Text(trans("withdraw_consent_desc")) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmWithdraw = false
+                    settings.withdrawLegal()
+                    onConsentWithdrawn()
+                }) { Text(trans("withdraw"), color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = { TextButton(onClick = { confirmWithdraw = false }) { Text(trans("cancel")) } },
+        )
+    }
+
+    if (confirmWipe) {
+        AlertDialog(
+            onDismissRequest = { confirmWipe = false },
+            title = { Text(trans("wipe_all")) },
+            text = { Text(trans("wipe_all_desc")) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmWipe = false
+                    onClearChat()
+                    settings.wipeAllData()
+                    onConsentWithdrawn()
+                }) { Text(trans("clear"), color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = { TextButton(onClick = { confirmWipe = false }) { Text(trans("cancel")) } },
         )
     }
 }

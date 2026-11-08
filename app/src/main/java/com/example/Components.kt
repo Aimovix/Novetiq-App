@@ -68,6 +68,11 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.FilterChip
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import kotlinx.coroutines.CoroutineStart
@@ -139,7 +144,7 @@ fun CodeBox(text: String, modifier: Modifier = Modifier, copyable: Boolean = fal
                 TextButton(
                     onClick = {
                         scope.launch {
-                            clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("Synaptiq", text)))
+                            clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("Aimovix", text)))
                             Toast.makeText(context, copiedMsg, Toast.LENGTH_SHORT).show()
                         }
                     },
@@ -210,14 +215,14 @@ fun HumanInTheLoopDialog(
                 Text(
                     text = trans("risk_label") + ": " + trans(riskKey(risk)),
                     style = MaterialTheme.typography.labelLarge,
-                    color = if (risk == CommandRisk.DESTRUCTIVE) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (risk == CommandRisk.DESTRUCTIVE || risk == CommandRisk.EXTERNAL) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         },
         confirmButton = {
             Button(
                 onClick = { if (risk == CommandRisk.DESTRUCTIVE) showSecondConfirmation = true else onConfirm() },
-                colors = if (risk == CommandRisk.DESTRUCTIVE) {
+                colors = if (risk == CommandRisk.DESTRUCTIVE || risk == CommandRisk.EXTERNAL) {
                     ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 } else ButtonDefaults.buttonColors(),
             ) { Text(trans("execute")) }
@@ -230,15 +235,16 @@ fun riskKey(risk: CommandRisk) = when (risk) {
     CommandRisk.READ_ONLY -> "risk_read"
     CommandRisk.WRITE -> "risk_write"
     CommandRisk.DESTRUCTIVE -> "risk_destructive"
+    CommandRisk.EXTERNAL -> "risk_external"
 }
 
-/** Runs trusted setup commands, asking for confirmation unless the security level is 1. */
+/** Runs trusted setup commands, asking for confirmation unless the security level is 0 or 1. */
 class SetupCommandRunner(private val context: Context, private val settings: SecurityHelper) {
     var pending by mutableStateOf<TermuxCommand?>(null)
         private set
 
     fun request(command: TermuxCommand) {
-        if (settings.getSecurityLevel() == 1) launch(command) else pending = command
+        if (settings.getSecurityLevel() <= 1) launch(command) else pending = command
     }
 
     fun confirm() {
@@ -283,33 +289,128 @@ fun rememberSetupCommandRunner(settings: SecurityHelper): SetupCommandRunner {
 @Composable
 fun SecurityLevelSelector(settings: SecurityHelper, onChanged: (Int) -> Unit = {}) {
     var selectedLevel by remember { mutableStateOf(settings.getSecurityLevel()) }
+    var askFullAutonomyConsent by remember { mutableStateOf(false) }
+    val select = { level: Int ->
+        settings.setSecurityLevel(level)
+        selectedLevel = settings.getSecurityLevel()
+        settings.appendAudit("SETTINGS", "security level -> $selectedLevel")
+        onChanged(selectedLevel)
+    }
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         listOf(
             Triple(3, "lvl3_name", "lvl3_desc"),
             Triple(2, "lvl2_name", "lvl2_desc"),
             Triple(1, "lvl1_name", "lvl1_desc"),
+            Triple(0, "lvl0_name", "lvl0_desc"),
         ).forEach { (level, name, desc) ->
             SecurityLevelItem(
                 title = trans(name),
                 description = trans(desc),
                 isSelected = selectedLevel == level,
+                danger = level == 0,
                 onClick = {
-                    selectedLevel = level
-                    settings.setSecurityLevel(level)
-                    onChanged(level)
+                    if (level == 0 && !settings.hasFullAutonomyConsent()) askFullAutonomyConsent = true else select(level)
                 },
             )
+        }
+    }
+    if (askFullAutonomyConsent) {
+        FullAutonomyConsentDialog(
+            onAccept = {
+                settings.recordFullAutonomyConsent()
+                askFullAutonomyConsent = false
+                select(0)
+            },
+            onDismiss = { askFullAutonomyConsent = false },
+        )
+    }
+}
+
+/**
+ * Separate, informed opt-in for full autonomy: the user has to tick the risk statement and type a
+ * confirmation word. The consent is stored with a timestamp (see [SecurityHelper.recordFullAutonomyConsent]).
+ */
+@Composable
+fun FullAutonomyConsentDialog(onAccept: () -> Unit, onDismiss: () -> Unit) {
+    var understood by remember { mutableStateOf(false) }
+    var typed by remember { mutableStateOf("") }
+    val word = trans("consent_word")
+    val valid = understood && typed.trim().equals(word, ignoreCase = true)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { Icon(Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+        title = { Text(trans("full_auto_title")) },
+        text = {
+            Column(
+                modifier = Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text(trans("full_auto_desc"), style = MaterialTheme.typography.bodyMedium)
+                CheckRow(checked = understood, onCheckedChange = { understood = it }, text = trans("full_auto_check"))
+                OutlinedTextField(
+                    value = typed,
+                    onValueChange = { typed = it },
+                    label = { Text(trans("full_auto_type").format(word)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onAccept,
+                enabled = valid,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+            ) { Text(trans("full_auto_enable")) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(trans("cancel")) } },
+    )
+}
+
+@Composable
+fun CheckRow(checked: Boolean, onCheckedChange: (Boolean) -> Unit, text: String, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .toggleable(value = checked, onValueChange = onCheckedChange, role = Role.Checkbox)
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Checkbox(checked = checked, onCheckedChange = null)
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+    }
+}
+
+/** Lets the user cap how many actions the agent may chain for one message. */
+@Composable
+fun MaxStepsSelector(settings: SecurityHelper) {
+    var steps by remember { mutableStateOf(settings.getMaxSteps()) }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(trans("max_steps_desc"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(6, 20, 50, 100).forEach { option ->
+                FilterChip(
+                    selected = steps == option,
+                    onClick = {
+                        settings.setMaxSteps(option)
+                        steps = option
+                    },
+                    label = { Text(option.toString()) },
+                )
+            }
         }
     }
 }
 
 @Composable
-fun SecurityLevelItem(title: String, description: String, isSelected: Boolean, onClick: () -> Unit) {
+fun SecurityLevelItem(title: String, description: String, isSelected: Boolean, onClick: () -> Unit, danger: Boolean = false) {
     val colors = MaterialTheme.colorScheme
+    val accent = if (danger) colors.error else colors.primary
     Surface(
         shape = MaterialTheme.shapes.large,
         color = if (isSelected) colors.primaryContainer else colors.surface,
-        border = BorderStroke(1.dp, if (isSelected) colors.primary else colors.outlineVariant),
+        border = BorderStroke(if (danger) 2.dp else 1.dp, if (isSelected || danger) accent else colors.outlineVariant),
         modifier = Modifier
             .fillMaxWidth()
             .selectable(selected = isSelected, onClick = onClick, role = Role.RadioButton),
@@ -698,7 +799,7 @@ fun TermuxConnectionSection(settings: SecurityHelper) {
 
 private suspend fun runConnectionTest(context: Context, lang: String): Pair<Boolean, String> {
     val executionId = TermuxResultHub.newExecutionId()
-    val command = TermuxCommand("${TermuxConstants.BIN}/echo", listOf("synaptiq-ok"), background = true, label = "Synaptiq test", risk = CommandRisk.READ_ONLY)
+    val command = TermuxCommand("${TermuxConstants.BIN}/echo", listOf("aimovix-ok"), background = true, label = "Aimovix test", risk = CommandRisk.READ_ONLY)
     return coroutineScope {
         val awaiting = async(start = CoroutineStart.UNDISPATCHED) {
             withTimeoutOrNull(20_000) { TermuxResultHub.results.first { it.executionId == executionId } }
@@ -720,7 +821,7 @@ private suspend fun runConnectionTest(context: Context, lang: String): Pair<Bool
         when {
             result == null -> false to Strings.get("err_termux_timeout", lang)
             !result.started -> false to Strings.get("err_termux_start", lang) + (result.errMessage ?: "")
-            result.stdout.contains("synaptiq-ok") -> true to Strings.get("test_ok", lang)
+            result.stdout.contains("aimovix-ok") -> true to Strings.get("test_ok", lang)
             else -> false to (result.stderr.ifBlank { Strings.get("err_termux_start", lang) })
         }
     }

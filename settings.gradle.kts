@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "Synaptiq"
+rootProject.name = "Aimovix"
 
 include(":app")
