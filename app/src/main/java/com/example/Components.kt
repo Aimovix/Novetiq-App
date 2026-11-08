@@ -144,7 +144,7 @@ fun CodeBox(text: String, modifier: Modifier = Modifier, copyable: Boolean = fal
                 TextButton(
                     onClick = {
                         scope.launch {
-                            clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("Synaptiq", text)))
+                            clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("Aimovix", text)))
                             Toast.makeText(context, copiedMsg, Toast.LENGTH_SHORT).show()
                         }
                     },
@@ -799,7 +799,7 @@ fun TermuxConnectionSection(settings: SecurityHelper) {
 
 private suspend fun runConnectionTest(context: Context, lang: String): Pair<Boolean, String> {
     val executionId = TermuxResultHub.newExecutionId()
-    val command = TermuxCommand("${TermuxConstants.BIN}/echo", listOf("synaptiq-ok"), background = true, label = "Synaptiq test", risk = CommandRisk.READ_ONLY)
+    val command = TermuxCommand("${TermuxConstants.BIN}/echo", listOf("aimovix-ok"), background = true, label = "Aimovix test", risk = CommandRisk.READ_ONLY)
     return coroutineScope {
         val awaiting = async(start = CoroutineStart.UNDISPATCHED) {
             withTimeoutOrNull(20_000) { TermuxResultHub.results.first { it.executionId == executionId } }
@@ -821,7 +821,7 @@ private suspend fun runConnectionTest(context: Context, lang: String): Pair<Bool
         when {
             result == null -> false to Strings.get("err_termux_timeout", lang)
             !result.started -> false to Strings.get("err_termux_start", lang) + (result.errMessage ?: "")
-            result.stdout.contains("synaptiq-ok") -> true to Strings.get("test_ok", lang)
+            result.stdout.contains("aimovix-ok") -> true to Strings.get("test_ok", lang)
             else -> false to (result.stderr.ifBlank { Strings.get("err_termux_start", lang) })
         }
     }

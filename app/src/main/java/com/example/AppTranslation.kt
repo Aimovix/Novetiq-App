@@ -56,7 +56,7 @@ object Strings {
 
         // Termux missing
         "termux_required" to "Termux is required",
-        "termux_required_desc" to "Synaptiq requires the Termux app as a secure execution environment for local AI commands.\n\nPlease note: The version in the Google Play Store is outdated and no longer works for our purposes. Instead, download Termux from F-Droid or directly via GitHub.",
+        "termux_required_desc" to "Aimovix requires the Termux app as a secure execution environment for local AI commands.\n\nPlease note: The version in the Google Play Store is outdated and no longer works for our purposes. Instead, download Termux from F-Droid or directly via GitHub.",
         "open_fdroid" to "Open via F-Droid",
         "open_github" to "Download via GitHub",
         "check_again" to "I installed Termux – check again",
@@ -75,7 +75,7 @@ object Strings {
         "restart_setup" to "Run setup wizard again",
         "defense_active" to "DEFENSE IN DEPTH ACTIVE",
         "defense_desc" to "Human-in-the-loop + whitelist / block list + approval for destructive actions + action log",
-        "termux_intro" to "Synaptiq sends commands to Termux. These steps are required once so that Termux accepts them.",
+        "termux_intro" to "Aimovix sends commands to Termux. These steps are required once so that Termux accepts them.",
 
         // Cloud API
         "keys_encrypted" to "Keys are stored encrypted on this device (Android Keystore, AES-256) and are only sent to the respective provider.",
@@ -116,7 +116,7 @@ object Strings {
 
         // Termux connection
         "perm_title" to "Allow command execution",
-        "perm_desc" to "Android permission that allows Synaptiq to send commands to Termux.",
+        "perm_desc" to "Android permission that allows Aimovix to send commands to Termux.",
         "grant" to "Grant",
         "app_settings" to "App settings",
         "permission_denied" to "Permission denied. You can grant it later in the app settings.",
@@ -133,7 +133,7 @@ object Strings {
         // Commands & dialogs
         "security_verification" to "Security Verification",
         "ai_wants_execute" to "The AI agent wants to execute the following command in Termux. Please review it carefully:",
-        "setup_wants_execute" to "Synaptiq will run the following setup command in Termux:",
+        "setup_wants_execute" to "Aimovix will run the following setup command in Termux:",
         "risk_label" to "Risk",
         "risk_read" to "read only",
         "risk_write" to "changes files or packages",
@@ -220,7 +220,7 @@ object Strings {
 
         // Legal
         "consent_title" to "Before you start",
-        "consent_intro" to "Synaptiq is an autonomous AI agent that can run commands on your device. Please read the terms and the privacy notice and confirm each point.",
+        "consent_intro" to "Aimovix is an autonomous AI agent that can run commands on your device. Please read the terms and the privacy notice and confirm each point.",
         "consent_ai_notice" to "You are interacting with an AI. AI can hallucinate: answers and commands can be wrong, made up or harmful even if they sound convincing. The AI is not a substitute for professional advice.",
         "read_terms" to "Terms & disclaimer",
         "read_privacy" to "Privacy notice",
@@ -268,7 +268,7 @@ object Strings {
 
         // Termux missing
         "termux_required" to "Termux wird benötigt",
-        "termux_required_desc" to "Synaptiq benötigt die Termux-App als sichere Ausführungsumgebung für lokale KI-Befehle.\n\nBitte beachte: Die Version im Google Play Store ist veraltet und funktioniert nicht mehr für unsere Zwecke. Lade Termux stattdessen von F-Droid oder direkt über GitHub herunter.",
+        "termux_required_desc" to "Aimovix benötigt die Termux-App als sichere Ausführungsumgebung für lokale KI-Befehle.\n\nBitte beachte: Die Version im Google Play Store ist veraltet und funktioniert nicht mehr für unsere Zwecke. Lade Termux stattdessen von F-Droid oder direkt über GitHub herunter.",
         "open_fdroid" to "Über F-Droid öffnen",
         "open_github" to "Über GitHub laden",
         "check_again" to "Termux ist installiert – erneut prüfen",
@@ -287,7 +287,7 @@ object Strings {
         "restart_setup" to "Einrichtungsassistent erneut starten",
         "defense_active" to "TIEFENVERTEIDIGUNG AKTIV",
         "defense_desc" to "Mensch-in-der-Schleife + Whitelist / Sperrliste + Freigabe für gefährliche Aktionen + Aktionsprotokoll",
-        "termux_intro" to "Synaptiq schickt Befehle an Termux. Diese Schritte sind einmalig nötig, damit Termux sie annimmt.",
+        "termux_intro" to "Aimovix schickt Befehle an Termux. Diese Schritte sind einmalig nötig, damit Termux sie annimmt.",
 
         // Cloud API
         "keys_encrypted" to "Schlüssel werden verschlüsselt auf dem Gerät gespeichert (Android Keystore, AES-256) und nur an den jeweiligen Anbieter gesendet.",
@@ -328,7 +328,7 @@ object Strings {
 
         // Termux connection
         "perm_title" to "Befehlsausführung erlauben",
-        "perm_desc" to "Android-Berechtigung, mit der Synaptiq Befehle an Termux senden darf.",
+        "perm_desc" to "Android-Berechtigung, mit der Aimovix Befehle an Termux senden darf.",
         "grant" to "Erlauben",
         "app_settings" to "App-Einstellungen",
         "permission_denied" to "Berechtigung verweigert. Du kannst sie später in den App-Einstellungen erteilen.",
@@ -345,7 +345,7 @@ object Strings {
         // Commands & dialogs
         "security_verification" to "Sicherheitsüberprüfung",
         "ai_wants_execute" to "Der KI-Agent möchte folgenden Befehl in Termux ausführen. Bitte prüfe ihn sorgfältig:",
-        "setup_wants_execute" to "Synaptiq führt folgenden Einrichtungsbefehl in Termux aus:",
+        "setup_wants_execute" to "Aimovix führt folgenden Einrichtungsbefehl in Termux aus:",
         "risk_label" to "Risiko",
         "risk_read" to "nur lesen",
         "risk_write" to "ändert Dateien oder Pakete",
@@ -432,7 +432,7 @@ object Strings {
 
         // Legal
         "consent_title" to "Bevor du startest",
-        "consent_intro" to "Synaptiq ist ein autonomer KI-Agent, der Befehle auf deinem Gerät ausführen kann. Bitte lies die Nutzungsbedingungen und die Datenschutzhinweise und bestätige jeden Punkt.",
+        "consent_intro" to "Aimovix ist ein autonomer KI-Agent, der Befehle auf deinem Gerät ausführen kann. Bitte lies die Nutzungsbedingungen und die Datenschutzhinweise und bestätige jeden Punkt.",
         "consent_ai_notice" to "Du interagierst mit einer KI. KI kann halluzinieren: Antworten und Befehle können falsch, erfunden oder schädlich sein, auch wenn sie überzeugend klingen. Die KI ersetzt keine fachliche Beratung.",
         "read_terms" to "Nutzungsbedingungen",
         "read_privacy" to "Datenschutz",

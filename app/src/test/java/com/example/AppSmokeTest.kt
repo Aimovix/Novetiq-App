@@ -51,7 +51,7 @@ class AppSmokeTest {
         installTermux()
         val settings = SecurityHelper(app)
         settings.withdrawLegal()
-        compose.setContent { SynaptiqApp(settings) }
+        compose.setContent { AimovixApp(settings) }
         compose.onNodeWithText("Before you start").assertIsDisplayed()
         compose.onNodeWithText("Accept & continue").assertIsNotEnabled()
         listOf(
@@ -79,14 +79,14 @@ class AppSmokeTest {
     }
 
     @Test fun showsInstallHintWhenTermuxIsMissing() {
-        compose.setContent { SynaptiqApp(SecurityHelper(app)) }
+        compose.setContent { AimovixApp(SecurityHelper(app)) }
         compose.onNodeWithText("Termux is required").assertIsDisplayed()
         compose.onNodeWithText("Open via F-Droid").assertIsDisplayed()
     }
 
     @Test fun setupWizardBlocksUntilAModelIsConfigured() {
         installTermux()
-        compose.setContent { SynaptiqApp(SecurityHelper(app)) }
+        compose.setContent { AimovixApp(SecurityHelper(app)) }
         compose.onNodeWithText("Setup Wizard").assertIsDisplayed()
         compose.onNodeWithText("Step 1 of 3").assertIsDisplayed()
         compose.onNodeWithText("Continue").performClick()
@@ -97,7 +97,7 @@ class AppSmokeTest {
         installTermux()
         val settings = SecurityHelper(app)
         settings.saveApiKey(LlmProviderType.CLAUDE, "test-key")
-        compose.setContent { SynaptiqApp(settings) }
+        compose.setContent { AimovixApp(settings) }
         compose.onNodeWithText("Continue").performClick()
         compose.onNodeWithText("Step 2 of 3").assertIsDisplayed()
         compose.onNodeWithText("Level 2: Supervised").assertIsDisplayed()
@@ -112,7 +112,7 @@ class AppSmokeTest {
         val settings = SecurityHelper(app)
         settings.saveApiKey(LlmProviderType.CLAUDE, "test-key")
         settings.setSetupComplete(true)
-        compose.setContent { SynaptiqApp(settings) }
+        compose.setContent { AimovixApp(settings) }
         compose.onNodeWithText("Anthropic Claude · claude-opus-5-5").assertIsDisplayed()
         compose.onNodeWithContentDescription("Settings").performClick()
         compose.onNodeWithText("Language").assertIsDisplayed()

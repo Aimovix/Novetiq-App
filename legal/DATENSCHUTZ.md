@@ -1,11 +1,11 @@
 <!-- Generiert aus app/src/main/java/com/example/LegalTexts.kt – bei Änderungen beide Stellen anpassen. -->
 
-# Datenschutzhinweise – Synaptiq
+# Datenschutzhinweise – Aimovix
 
 Stand: 08.11.2026
 
 ## 1. Verantwortlicher
-[Name bzw. Firma des Anbieters], [Anschrift, E-Mail-Adresse]
+[Vor- und Nachname], [E-Mail-Adresse]
 
 ## 2. Grundsatz
 Der Anbieter betreibt keine eigenen Server. Er erhält weder deine Chats, Befehle und Dateien noch deine API-Schlüssel. Es gibt kein Tracking, keine Analyse-Tools und keine Werbung.

@@ -63,7 +63,7 @@ object WebTool {
             connection.instanceFollowRedirects = true // HttpURLConnection never downgrades https -> http.
             connection.connectTimeout = 15_000
             connection.readTimeout = 30_000
-            connection.setRequestProperty("User-Agent", "Synaptiq-Agent/${BuildConfig.VERSION_NAME} (Android)")
+            connection.setRequestProperty("User-Agent", "Aimovix-Agent/${BuildConfig.VERSION_NAME} (Android)")
             connection.setRequestProperty("Accept", "text/html,text/plain,application/json,application/xml;q=0.9,*/*;q=0.5")
             val code = connection.responseCode
             // A redirect may have led to a private host.

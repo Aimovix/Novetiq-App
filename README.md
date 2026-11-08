@@ -1,4 +1,4 @@
-# Synaptiq
+# Aimovix
 
 Autonomer KI-Agent für Android, der Befehle sicher in [Termux](https://termux.dev) ausführt.
 Unterstützt Google Gemini, OpenAI und Anthropic Claude (Cloud) sowie lokale Modelle über

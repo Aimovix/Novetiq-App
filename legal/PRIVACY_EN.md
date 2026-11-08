@@ -1,11 +1,11 @@
 <!-- Generated from app/src/main/java/com/example/LegalTexts.kt – keep both in sync. -->
 
-# Privacy Notice – Synaptiq
+# Privacy Notice – Aimovix
 
 Effective: 08.11.2026
 
 ## 1. Controller
-[Name bzw. Firma des Anbieters], [Anschrift, E-Mail-Adresse]
+[Vor- und Nachname], [E-Mail-Adresse]
 
 ## 2. Principle
 The Provider does not run any servers. It receives neither your chats, commands and files nor your API keys. There is no tracking, no analytics and no advertising.

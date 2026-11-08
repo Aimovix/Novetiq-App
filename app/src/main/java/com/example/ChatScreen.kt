@@ -165,7 +165,7 @@ private fun ChatTopBar(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text("Synaptiq", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                Text("Aimovix", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
                 Box {
                     Row(
                         modifier = Modifier.clickable { menuOpen = true }.padding(vertical = 2.dp),
@@ -237,7 +237,7 @@ private fun EmptyChat(onSuggestion: (String) -> Unit) {
             modifier = Modifier.size(56.dp).background(MaterialTheme.colorScheme.primary, MaterialTheme.shapes.medium),
             contentAlignment = Alignment.Center,
         ) {
-            Text("S", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = 24.sp)
+            Text("A", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = 24.sp)
         }
         Spacer(Modifier.size(16.dp))
         Text(

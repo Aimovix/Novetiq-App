@@ -21,21 +21,25 @@
 | Widerruf der Zustimmung und „Alle Daten löschen“ (DSGVO) | Einstellungen → Rechtliches |
 | Nutzungsbedingungen und Datenschutzhinweise jederzeit einsehbar | Einstellungen → Rechtliches |
 
-## Was du noch tun musst
+## Was du noch tun musst (Hobby-App, keine Firma)
 
-1. **Platzhalter ausfüllen:** In `app/src/main/java/com/example/LegalTexts.kt` stehen `OPERATOR` und
-   `CONTACT`. Trag deinen Namen (oder deine Firma) und eine ladungsfähige Anschrift plus E-Mail ein.
-   Ändere danach auch die Markdown-Dateien in diesem Ordner.
-2. **Impressum:** Wenn du die App geschäftsmäßig anbietest (auch kostenlos, z. B. mit Werbung oder
-   als Marketing), brauchst du ein Impressum nach § 5 DDG, z. B. auf deiner Website und im Store-Eintrag.
-3. **Datenschutzerklärung als URL:** Google Play verlangt einen öffentlichen Link. Du kannst
-   `DATENSCHUTZ.md` und `PRIVACY_EN.md` z. B. über GitHub Pages veröffentlichen.
-4. **Play-Store-Formular „Datensicherheit“** wahrheitsgemäß ausfüllen: Die App selbst sammelt keine
-   Daten, sendet Eingaben aber an den gewählten KI-Anbieter.
-5. **Bei Änderungen der Texte** `LegalTexts.VERSION` erhöhen, damit alle Nutzer erneut zustimmen.
-6. **Kostenpflichtige Version?** Dann gilt die Haftungsprivilegierung für unentgeltliche Leistungen
-   (§§ 521, 599 BGB) nicht mehr, und Ziffer 7 der Nutzungsbedingungen muss angepasst werden.
-   Außerdem kommen Widerrufsbelehrung und Gewährleistungsregeln hinzu.
+Du brauchst **keine Firma**. Als Privatperson bist du in den Texten einfach der „Anbieter“.
+
+1. **Platzhalter ausfüllen:** In `app/src/main/java/com/example/LegalTexts.kt` deinen Vor- und
+   Nachnamen (`OPERATOR`) und eine E-Mail-Adresse (`CONTACT`) eintragen, danach auch die
+   Markdown-Dateien in diesem Ordner. Die Datenschutz-Grundverordnung verlangt, dass Nutzer den
+   Verantwortlichen erreichen können; dafür reicht eine E-Mail-Adresse.
+2. **Impressum:** Für ein rein privates, nicht kommerzielles Hobbyprojekt (keine Werbung, keine
+   Einnahmen, keine In-App-Käufe) ist in der Regel kein Impressum nach § 5 DDG nötig. Sobald du
+   Geld damit verdienst, brauchst du eines, mit ladungsfähiger Anschrift.
+3. **Google Play:** Bei der Kontoeinrichtung als „Nicht-Händler“ (Privatperson ohne Einnahmen)
+   angeben. Play verlangt trotzdem einen öffentlichen Link zur Datenschutzerklärung, z. B.
+   `DATENSCHUTZ.md` über GitHub Pages, und das Formular „Datensicherheit“: Die App selbst sammelt
+   keine Daten, sendet Eingaben aber an den gewählten KI-Anbieter.
+4. **Bei Änderungen der Texte** `LegalTexts.VERSION` erhöhen, damit alle Nutzer erneut zustimmen.
+5. **Wenn du später Geld verlangst oder Werbung einbaust:** Dann gilt die Haftungsprivilegierung
+   für unentgeltliche Leistungen (§§ 521, 599 BGB) nicht mehr, Ziffer 7 der Nutzungsbedingungen muss
+   angepasst werden, und Impressum, Widerrufsbelehrung und Gewährleistungsregeln kommen hinzu.
 
 ## Dateien
 

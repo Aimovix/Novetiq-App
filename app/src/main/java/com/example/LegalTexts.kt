@@ -12,9 +12,10 @@ object LegalTexts {
     const val VERSION = 1
     const val DATE = "08.11.2026"
 
-    // TODO(publisher): replace with your real name/company and a reachable address + e-mail.
-    const val OPERATOR = "[Name bzw. Firma des Anbieters]"
-    const val CONTACT = "[Anschrift, E-Mail-Adresse]"
+    // TODO(publisher): Aimovix is a private hobby project - put in your own name and an e-mail
+    // address where you can be reached. A company is not needed.
+    const val OPERATOR = "[Vor- und Nachname]"
+    const val CONTACT = "[E-Mail-Adresse]"
 
     enum class Doc { TERMS, PRIVACY }
 
@@ -32,7 +33,7 @@ object LegalTexts {
 Stand: $DATE · Version $VERSION
 
 1. Anbieter und Geltungsbereich
-Diese Bedingungen gelten für die Nutzung der App „Synaptiq“ (die „App“), angeboten von $OPERATOR, $CONTACT (der „Anbieter“). Mit dem Tippen auf „Akzeptieren“ schließt du mit dem Anbieter einen unentgeltlichen Nutzungsvertrag zu diesen Bedingungen.
+Diese Bedingungen gelten für die Nutzung der App „Aimovix“ (die „App“), angeboten von $OPERATOR, $CONTACT (der „Anbieter“). Aimovix ist ein privates, nicht kommerzielles Hobbyprojekt einer Privatperson. Mit dem Tippen auf „Akzeptieren“ schließt du mit dem Anbieter einen unentgeltlichen Nutzungsvertrag zu diesen Bedingungen.
 
 2. Was die App macht
 Die App ist eine Software-Oberfläche. Sie leitet deine Anfragen an KI-Sprachmodelle von Drittanbietern (z. B. Google, OpenAI, Anthropic) oder an ein von dir lokal betriebenes Modell (Ollama) weiter. Je nach gewählter Sicherheitsstufe kann die KI Befehle in der App „Termux“ auf deinem Gerät ausführen, Dateien schreiben und Webseiten abrufen. Der Anbieter betreibt selbst keine KI-Modelle und keine Server. Den Vertrag mit einem KI-Anbieter schließt du selbst ab (eigener API-Schlüssel). Ein bestimmter Erfolg, eine bestimmte Verfügbarkeit oder Fehlerfreiheit ist nicht geschuldet.
@@ -79,7 +80,7 @@ Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrec
 Effective: $DATE · Version $VERSION
 
 1. Provider and scope
-These terms govern the use of the app "Synaptiq" (the "App"), provided by $OPERATOR, $CONTACT (the "Provider"). By tapping "Accept" you enter into a free-of-charge usage agreement with the Provider on these terms.
+These terms govern the use of the app "Aimovix" (the "App"), provided by $OPERATOR, $CONTACT (the "Provider"). Aimovix is a private, non-commercial hobby project of a private individual. By tapping "Accept" you enter into a free-of-charge usage agreement with the Provider on these terms.
 
 2. What the App does
 The App is a software interface. It forwards your requests to AI language models of third parties (e.g. Google, OpenAI, Anthropic) or to a model you run locally (Ollama). Depending on the selected security level the AI can run commands in the "Termux" app on your device, write files and fetch web pages. The Provider does not run any AI models or servers. You conclude the contract with an AI provider yourself (your own API key). No particular result, availability or freedom from errors is owed.

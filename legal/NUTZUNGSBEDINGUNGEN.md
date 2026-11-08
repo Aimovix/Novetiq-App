@@ -1,11 +1,11 @@
 <!-- Generiert aus app/src/main/java/com/example/LegalTexts.kt – bei Änderungen beide Stellen anpassen. -->
 
-# Nutzungsbedingungen & Haftungsausschluss – Synaptiq
+# Nutzungsbedingungen & Haftungsausschluss – Aimovix
 
 Stand: 08.11.2026 · Version 1
 
 ## 1. Anbieter und Geltungsbereich
-Diese Bedingungen gelten für die Nutzung der App „Synaptiq“ (die „App“), angeboten von [Name bzw. Firma des Anbieters], [Anschrift, E-Mail-Adresse] (der „Anbieter“). Mit dem Tippen auf „Akzeptieren“ schließt du mit dem Anbieter einen unentgeltlichen Nutzungsvertrag zu diesen Bedingungen.
+Diese Bedingungen gelten für die Nutzung der App „Aimovix“ (die „App“), angeboten von [Vor- und Nachname], [E-Mail-Adresse] (der „Anbieter“). Aimovix ist ein privates, nicht kommerzielles Hobbyprojekt einer Privatperson. Mit dem Tippen auf „Akzeptieren“ schließt du mit dem Anbieter einen unentgeltlichen Nutzungsvertrag zu diesen Bedingungen.
 
 ## 2. Was die App macht
 Die App ist eine Software-Oberfläche. Sie leitet deine Anfragen an KI-Sprachmodelle von Drittanbietern (z. B. Google, OpenAI, Anthropic) oder an ein von dir lokal betriebenes Modell (Ollama) weiter. Je nach gewählter Sicherheitsstufe kann die KI Befehle in der App „Termux“ auf deinem Gerät ausführen, Dateien schreiben und Webseiten abrufen. Der Anbieter betreibt selbst keine KI-Modelle und keine Server. Den Vertrag mit einem KI-Anbieter schließt du selbst ab (eigener API-Schlüssel). Ein bestimmter Erfolg, eine bestimmte Verfügbarkeit oder Fehlerfreiheit ist nicht geschuldet.

@@ -152,7 +152,7 @@ fun AuditLogDialog(settings: SecurityHelper, onDismiss: () -> Unit) {
             Row {
                 TextButton(onClick = {
                     scope.launch {
-                        clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("Synaptiq log", lines.joinToString("\n"))))
+                        clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("Aimovix log", lines.joinToString("\n"))))
                         Toast.makeText(context, copiedMsg, Toast.LENGTH_SHORT).show()
                     }
                 }, enabled = lines.isNotEmpty()) { Text(trans("copy")) }

@@ -64,7 +64,7 @@ object ActionValidator {
                             executable = "${TermuxConstants.BIN}/bash",
                             arguments = listOf("-c", action.script.trim()),
                             background = true,
-                            label = "Synaptiq agent (full autonomy)",
+                            label = "Aimovix agent (full autonomy)",
                             risk = verdict.risk,
                         ),
                         AgentTool.TERMUX,
@@ -94,9 +94,9 @@ object ActionValidator {
         // The path is passed as $1, never interpolated into the script, so it cannot inject code.
         val command = TermuxCommand(
             executable = "${TermuxConstants.BIN}/bash",
-            arguments = listOf("-c", WRITE_SCRIPT, "synaptiq-write", path),
+            arguments = listOf("-c", WRITE_SCRIPT, "aimovix-write", path),
             background = true,
-            label = "Synaptiq agent: write file",
+            label = "Aimovix agent: write file",
             risk = risk,
             stdin = action.content,
         )

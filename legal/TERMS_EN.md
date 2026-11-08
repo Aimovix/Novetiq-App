@@ -1,11 +1,11 @@
 <!-- Generated from app/src/main/java/com/example/LegalTexts.kt – keep both in sync. -->
 
-# Terms of Use & Disclaimer – Synaptiq
+# Terms of Use & Disclaimer – Aimovix
 
 Effective: 08.11.2026 · Version 1
 
 ## 1. Provider and scope
-These terms govern the use of the app "Synaptiq" (the "App"), provided by [Name bzw. Firma des Anbieters], [Anschrift, E-Mail-Adresse] (the "Provider"). By tapping "Accept" you enter into a free-of-charge usage agreement with the Provider on these terms.
+These terms govern the use of the app "Aimovix" (the "App"), provided by [Vor- und Nachname], [E-Mail-Adresse] (the "Provider"). Aimovix is a private, non-commercial hobby project of a private individual. By tapping "Accept" you enter into a free-of-charge usage agreement with the Provider on these terms.
 
 ## 2. What the App does
 The App is a software interface. It forwards your requests to AI language models of third parties (e.g. Google, OpenAI, Anthropic) or to a model you run locally (Ollama). Depending on the selected security level the AI can run commands in the "Termux" app on your device, write files and fetch web pages. The Provider does not run any AI models or servers. You conclude the contract with an AI provider yourself (your own API key). No particular result, availability or freedom from errors is owed.

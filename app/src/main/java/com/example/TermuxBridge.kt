@@ -70,7 +70,7 @@ data class TermuxCommand(
 
     companion object {
         /** Builds the command for a validated agent request (background, output captured). */
-        fun fromValidated(allowed: ValidationResult.Allowed, label: String = "Synaptiq agent") = TermuxCommand(
+        fun fromValidated(allowed: ValidationResult.Allowed, label: String = "Aimovix agent") = TermuxCommand(
             executable = "${TermuxConstants.BIN}/${allowed.executable}",
             arguments = allowed.args,
             background = true,
@@ -92,21 +92,21 @@ object SetupCommands {
         executable = "${TermuxConstants.BIN}/bash",
         arguments = listOf("-c", "pkg update -y && pkg upgrade -y"),
         background = false,
-        label = "Synaptiq setup: pkg update",
+        label = "Aimovix setup: pkg update",
     )
 
     val INSTALL_PYTHON = TermuxCommand(
         executable = "${TermuxConstants.BIN}/pkg",
         arguments = listOf("install", "-y", "python"),
         background = false,
-        label = "Synaptiq setup: python",
+        label = "Aimovix setup: python",
     )
 
     val INSTALL_OLLAMA = TermuxCommand(
         executable = "${TermuxConstants.BIN}/pkg",
         arguments = listOf("install", "-y", "ollama"),
         background = false,
-        label = "Synaptiq setup: ollama",
+        label = "Aimovix setup: ollama",
     )
 
     /** Starts the local model server in its own visible Termux session (keeps running). */
@@ -114,14 +114,14 @@ object SetupCommands {
         executable = "${TermuxConstants.BIN}/ollama",
         arguments = listOf("serve"),
         background = false,
-        label = "Synaptiq: ollama serve",
+        label = "Aimovix: ollama serve",
     )
 
     fun pullModel(tag: String) = TermuxCommand(
         executable = "${TermuxConstants.BIN}/ollama",
         arguments = listOf("pull", tag),
         background = false,
-        label = "Synaptiq setup: ollama pull $tag",
+        label = "Aimovix setup: ollama pull $tag",
     )
 }
 

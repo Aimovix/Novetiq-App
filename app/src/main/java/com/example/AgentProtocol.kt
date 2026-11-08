@@ -45,7 +45,7 @@ object AgentProtocol {
     fun systemPrompt(securityLevel: Int, language: String, maxSteps: Int = DEFAULT_MAX_STEPS): String {
         val reply = if (language == Strings.GERMAN) "Antworte auf Deutsch." else "Reply in English."
         val identity = """
-            You are Synaptiq, an autonomous AI agent running inside an Android app. You carry out the
+            You are Aimovix, an autonomous AI agent running inside an Android app. You carry out the
             user's tasks yourself instead of only explaining them. You can use the Termux Linux
             environment on the phone (home directory: ${TermuxConstants.HOME}).
         """.trimIndent()

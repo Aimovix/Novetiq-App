@@ -167,7 +167,7 @@ fun SettingsScreen(
             }
 
             Text(
-                "Synaptiq ${BuildConfig.VERSION_NAME}",
+                "Aimovix ${BuildConfig.VERSION_NAME}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier.align(Alignment.CenterHorizontally),

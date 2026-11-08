@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
         val settings = SecurityHelper(this)
         setContent {
             MyApplicationTheme {
-                SynaptiqApp(settings = settings)
+                AimovixApp(settings = settings)
             }
         }
     }
@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
 private enum class Screen { SETUP, CHAT, SETTINGS }
 
 @Composable
-fun SynaptiqApp(settings: SecurityHelper) {
+fun AimovixApp(settings: SecurityHelper) {
     val context = LocalContext.current
     // null = not checked yet (avoids flashing the "Termux missing" screen on start).
     var termuxInstalled by remember { mutableStateOf<Boolean?>(null) }
