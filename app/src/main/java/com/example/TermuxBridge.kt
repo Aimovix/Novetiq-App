@@ -31,6 +31,8 @@ object TermuxConstants {
     const val EXTRA_SESSION_ACTION = "com.termux.RUN_COMMAND_SESSION_ACTION"
     const val EXTRA_COMMAND_LABEL = "com.termux.RUN_COMMAND_COMMAND_LABEL"
     const val EXTRA_PENDING_INTENT = "com.termux.RUN_COMMAND_PENDING_INTENT"
+    /** Text passed to the command's standard input (background commands only, Termux 0.109+). */
+    const val EXTRA_STDIN = "com.termux.RUN_COMMAND_STDIN"
 
     const val RESULT_BUNDLE = "result"
     const val RESULT_STDOUT = "stdout"
@@ -53,6 +55,7 @@ object TermuxConstants {
  *
  * @param background `true` runs it as an invisible background task whose output is returned to
  *   the app. `false` opens a visible Termux terminal session (used for long running setup steps).
+ * @param stdin optional standard input (used to write file contents without any shell quoting).
  */
 data class TermuxCommand(
     val executable: String,
@@ -60,6 +63,7 @@ data class TermuxCommand(
     val background: Boolean,
     val label: String,
     val risk: CommandRisk = CommandRisk.WRITE,
+    val stdin: String? = null,
 ) {
     val displayText: String
         get() = (listOf(executable.substringAfterLast('/')) + arguments.map(::quoteIfNeeded)).joinToString(" ")
@@ -212,6 +216,7 @@ object TermuxBridge {
             // 0 = open the new session and bring Termux to the foreground.
             putExtra(TermuxConstants.EXTRA_SESSION_ACTION, "0")
             putExtra(TermuxConstants.EXTRA_COMMAND_LABEL, command.label)
+            if (command.stdin != null) putExtra(TermuxConstants.EXTRA_STDIN, command.stdin)
             if (executionId != null) {
                 putExtra(TermuxConstants.EXTRA_PENDING_INTENT, resultPendingIntent(context, executionId))
             }

@@ -2,12 +2,17 @@ package com.example
 
 import android.content.pm.PackageInfo
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -29,6 +34,8 @@ class AppSmokeTest {
 
     @Before fun resetSettings() {
         SecurityHelper(app).apply {
+            wipeAllData()
+            acceptLegal()
             setSetupComplete(false)
             setLanguage(Strings.ENGLISH)
             clearChatHistory()
@@ -38,6 +45,37 @@ class AppSmokeTest {
 
     private fun installTermux() {
         shadowOf(app.packageManager).installPackage(PackageInfo().apply { packageName = TermuxConstants.PACKAGE })
+    }
+
+    @Test fun consentIsRequiredBeforeAnythingElse() {
+        installTermux()
+        val settings = SecurityHelper(app)
+        settings.withdrawLegal()
+        compose.setContent { SynaptiqApp(settings) }
+        compose.onNodeWithText("Before you start").assertIsDisplayed()
+        compose.onNodeWithText("Accept & continue").assertIsNotEnabled()
+        listOf(
+            "I am at least 18 years old.",
+            "I understand that the AI can hallucinate and make mistakes (wrong, incomplete or invented information, faulty commands) and I check results myself.",
+            "I am responsible for all actions I approve or that run automatically because of my security level, and I back up important data myself.",
+            "I have read and accept the terms of use including the limitation of liability.",
+            "I have read the privacy notice. I know that my inputs are sent to the AI provider I choose.",
+        ).forEach { compose.onNodeWithText(it).performScrollTo().performClick() }
+        compose.onNodeWithText("Accept & continue").assertIsEnabled().performClick()
+        compose.onNodeWithText("Setup Wizard").assertIsDisplayed()
+        assertTrue(settings.hasAcceptedCurrentLegal())
+    }
+
+    @Test fun fullAutonomyNeedsSeparateConsent() {
+        val settings = SecurityHelper(app)
+        settings.setSecurityLevel(0)
+        assertEquals(SecurityHelper.DEFAULT_SECURITY_LEVEL, settings.getSecurityLevel())
+        settings.recordFullAutonomyConsent()
+        settings.setSecurityLevel(0)
+        assertEquals(0, settings.getSecurityLevel())
+        settings.withdrawLegal()
+        assertEquals(SecurityHelper.DEFAULT_SECURITY_LEVEL, settings.getSecurityLevel())
+        assertTrue(settings.getAuditLog().any { it.contains("withdrawn") })
     }
 
     @Test fun showsInstallHintWhenTermuxIsMissing() {

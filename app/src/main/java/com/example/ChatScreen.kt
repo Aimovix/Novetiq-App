@@ -128,7 +128,7 @@ fun ChatScreen(
     state.pendingApproval?.let { pending ->
         HumanInTheLoopDialog(
             command = pending.command,
-            risk = pending.allowed.risk,
+            risk = pending.risk,
             onConfirm = viewModel::approvePending,
             onDismiss = viewModel::denyPending,
         )
@@ -215,12 +215,13 @@ private fun ChatTopBar(
 private fun SecurityLevelBadge(level: Int) {
     val colors = MaterialTheme.colorScheme
     val (bg, fg) = when (level) {
+        0 -> colors.error to colors.onError
         1 -> colors.errorContainer to colors.onErrorContainer
         3 -> colors.tertiaryContainer to colors.onTertiaryContainer
         else -> colors.primaryContainer to colors.onPrimaryContainer
     }
     Surface(shape = CircleShape, color = bg) {
-        Text("L$level", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = fg, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
+        Text(if (level == 0) "L0 AUTO" else "L$level", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = fg, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
     }
 }
 
@@ -309,7 +310,12 @@ private fun CommandCard(entry: ChatEntry) {
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Termux", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = colors.secondary, modifier = Modifier.weight(1f))
+                val toolLabel = when (entry.tool) {
+                    AgentTool.FILE -> trans("tool_file")
+                    AgentTool.WEB -> trans("tool_web")
+                    AgentTool.TERMUX, null -> "Termux"
+                }
+                Text(toolLabel, fontWeight = FontWeight.Bold, fontSize = 12.sp, color = colors.secondary, modifier = Modifier.weight(1f))
                 if (entry.status == CommandStatus.RUNNING) {
                     CircularProgressIndicator(modifier = Modifier.size(14.dp).padding(end = 4.dp), strokeWidth = 2.dp)
                 }
@@ -319,7 +325,7 @@ private fun CommandCard(entry: ChatEntry) {
             Surface(color = com.example.ui.theme.Slate900, shape = MaterialTheme.shapes.small, modifier = Modifier.fillMaxWidth()) {
                 SelectionContainer {
                     Text(
-                        "$ " + entry.command.orEmpty(),
+                        if (entry.tool == null || entry.tool == AgentTool.TERMUX) "$ " + entry.command.orEmpty() else entry.command.orEmpty(),
                         fontFamily = FontFamily.Monospace,
                         fontSize = 13.sp,
                         color = com.example.ui.theme.Green100,
@@ -360,8 +366,9 @@ private fun ChatInput(
     onStop: () -> Unit,
 ) {
     Surface(color = MaterialTheme.colorScheme.surface, tonalElevation = 2.dp, modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.navigationBarsPadding()) {
         Row(
-            modifier = Modifier.navigationBarsPadding().padding(8.dp).fillMaxWidth(),
+            modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             OutlinedTextField(
@@ -402,6 +409,15 @@ private fun ChatInput(
                     ),
                 ) { Icon(Icons.AutoMirrored.Filled.Send, contentDescription = trans("send")) }
             }
+        }
+        // Transparency notice (AI interaction + hallucinations), always visible below the input.
+        Text(
+            trans("ai_disclaimer_short"),
+            fontSize = 11.sp,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+        )
         }
     }
 }

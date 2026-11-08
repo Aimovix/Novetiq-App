@@ -1,5 +1,6 @@
 package com.example
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -50,6 +51,7 @@ fun SynaptiqApp(settings: SecurityHelper) {
         mutableStateOf(if (settings.isSetupComplete()) Screen.CHAT else Screen.SETUP)
     }
     var returnTo by rememberSaveable { mutableStateOf(Screen.CHAT) }
+    var legalAccepted by remember { mutableStateOf(settings.hasAcceptedCurrentLegal()) }
     val chatViewModel: ChatViewModel = viewModel()
 
     // Re-check on every resume so installing Termux and coming back just works.
@@ -67,6 +69,14 @@ fun SynaptiqApp(settings: SecurityHelper) {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
             when {
+                // Terms, disclaimer and privacy notice must be accepted before anything else.
+                !legalAccepted -> ConsentScreen(
+                    onAccept = {
+                        settings.acceptLegal()
+                        legalAccepted = true
+                    },
+                    onDecline = { (context as? Activity)?.finish() },
+                )
                 termuxInstalled == null -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 termuxInstalled == false && screen != Screen.SETTINGS ->
                     MissingTermuxScreen(onRetry = { termuxInstalled = TermuxBridge.isInstalled(context) })
@@ -82,6 +92,11 @@ fun SynaptiqApp(settings: SecurityHelper) {
                         screen = Screen.SETUP
                     },
                     onClearChat = chatViewModel::clear,
+                    onConsentWithdrawn = {
+                        if (chatViewModel.state.value.isBusy) chatViewModel.stop()
+                        legalAccepted = false
+                        screen = if (settings.isSetupComplete()) Screen.CHAT else Screen.SETUP
+                    },
                     onBack = {
                         chatViewModel.refreshProvider()
                         screen = if (returnTo == Screen.CHAT && !settings.isSetupComplete()) Screen.SETUP else returnTo

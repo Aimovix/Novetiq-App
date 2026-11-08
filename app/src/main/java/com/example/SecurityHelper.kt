@@ -128,14 +128,102 @@ class SecurityHelper(context: Context) {
     fun getLanguage(): String =
         prefs.getString("APP_LANGUAGE", null) ?: Strings.defaultLanguageFor(Locale.getDefault())
 
+    /**
+     * 0 = full autonomy, 1 = autonomous, 2 = supervised, 3 = sandbox. Level 0 can only be stored
+     * after the user gave the separate full-autonomy consent.
+     */
     fun setSecurityLevel(level: Int) {
-        val validLevel = if (level in 1..3) level else DEFAULT_SECURITY_LEVEL
+        val validLevel = when {
+            level == 0 && !hasFullAutonomyConsent() -> return
+            level in 0..3 -> level
+            else -> DEFAULT_SECURITY_LEVEL
+        }
         prefs.edit { putInt("SECURITY_LEVEL", validLevel) }
     }
 
-    fun getSecurityLevel(): Int =
-        prefs.getInt("SECURITY_LEVEL", DEFAULT_SECURITY_LEVEL).takeIf { it in 1..3 }
-            ?: DEFAULT_SECURITY_LEVEL
+    fun getSecurityLevel(): Int {
+        val level = prefs.getInt("SECURITY_LEVEL", DEFAULT_SECURITY_LEVEL)
+        return when {
+            level == 0 && !hasFullAutonomyConsent() -> DEFAULT_SECURITY_LEVEL
+            level in 0..3 -> level
+            else -> DEFAULT_SECURITY_LEVEL
+        }
+    }
+
+    /** Maximum number of tool calls the agent may chain for one user message. */
+    fun setMaxSteps(steps: Int) {
+        prefs.edit { putInt("MAX_STEPS", steps.coerceIn(1, MAX_STEPS_LIMIT)) }
+    }
+
+    fun getMaxSteps(): Int = prefs.getInt("MAX_STEPS", AgentProtocol.DEFAULT_MAX_STEPS).coerceIn(1, MAX_STEPS_LIMIT)
+
+    // --- Legal consent --------------------------------------------------------------------
+
+    /** Stores that the user accepted the current terms, disclaimer and privacy notice. */
+    fun acceptLegal(version: Int = LegalTexts.VERSION, timestamp: Long = System.currentTimeMillis()) {
+        prefs.edit {
+            putInt("LEGAL_VERSION", version)
+            putLong("LEGAL_ACCEPTED_AT", timestamp)
+        }
+        appendAudit("CONSENT", "terms v$version accepted")
+    }
+
+    fun hasAcceptedCurrentLegal(): Boolean = prefs.getInt("LEGAL_VERSION", 0) >= LegalTexts.VERSION
+
+    fun legalAcceptedAt(): Long? = prefs.getLong("LEGAL_ACCEPTED_AT", 0L).takeIf { it > 0 }
+
+    /** Withdraws every consent. The app returns to the consent screen and full autonomy is off. */
+    fun withdrawLegal() {
+        prefs.edit {
+            remove("LEGAL_VERSION")
+            remove("LEGAL_ACCEPTED_AT")
+            remove("FULL_AUTONOMY_CONSENT_AT")
+            if (prefs.getInt("SECURITY_LEVEL", DEFAULT_SECURITY_LEVEL) == 0) putInt("SECURITY_LEVEL", DEFAULT_SECURITY_LEVEL)
+        }
+        appendAudit("CONSENT", "all consents withdrawn")
+    }
+
+    fun recordFullAutonomyConsent(timestamp: Long = System.currentTimeMillis()) {
+        prefs.edit { putLong("FULL_AUTONOMY_CONSENT_AT", timestamp) }
+        appendAudit("CONSENT", "full autonomy risks accepted")
+    }
+
+    fun hasFullAutonomyConsent(): Boolean = prefs.getLong("FULL_AUTONOMY_CONSENT_AT", 0L) > 0
+
+    fun revokeFullAutonomyConsent() {
+        prefs.edit {
+            remove("FULL_AUTONOMY_CONSENT_AT")
+            if (prefs.getInt("SECURITY_LEVEL", DEFAULT_SECURITY_LEVEL) == 0) putInt("SECURITY_LEVEL", 1)
+        }
+        appendAudit("CONSENT", "full autonomy consent revoked")
+    }
+
+    // --- Audit log ------------------------------------------------------------------------
+
+    /** Appends one line to the encrypted, on-device log of everything the agent did. */
+    fun appendAudit(outcome: String, detail: String, timestamp: Long = System.currentTimeMillis()) {
+        val time = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ROOT).format(java.util.Date(timestamp))
+        val line = "$time | L${prefs.getInt("SECURITY_LEVEL", DEFAULT_SECURITY_LEVEL)} | $outcome | " +
+            detail.replace('\n', ' ').take(MAX_AUDIT_LINE)
+        val lines = (getAuditLog() + line).takeLast(MAX_AUDIT_ENTRIES)
+        prefs.edit { putString("AUDIT_LOG", org.json.JSONArray(lines).toString()) }
+    }
+
+    fun getAuditLog(): List<String> = try {
+        val array = org.json.JSONArray(prefs.getString("AUDIT_LOG", null) ?: "[]")
+        (0 until array.length()).map { array.getString(it) }
+    } catch (e: Exception) {
+        emptyList()
+    }
+
+    fun clearAuditLog() {
+        prefs.edit { remove("AUDIT_LOG") }
+    }
+
+    /** Deletes every setting, key, chat and log of this app from the device. */
+    fun wipeAllData() {
+        prefs.edit { clear() }
+    }
 
     fun setSetupComplete(complete: Boolean) {
         prefs.edit { putBoolean("SETUP_COMPLETE", complete) }
@@ -159,6 +247,9 @@ class SecurityHelper(context: Context) {
         private const val TAG = "SecurityHelper"
         private const val PREFS_NAME = "synaptiq_secure_prefs"
         const val DEFAULT_SECURITY_LEVEL = 2
+        const val MAX_STEPS_LIMIT = 100
+        private const val MAX_AUDIT_ENTRIES = 300
+        private const val MAX_AUDIT_LINE = 400
     }
 }
 

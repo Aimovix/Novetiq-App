@@ -6,8 +6,12 @@ package com.example
  * - [WRITE] commands create/modify files or install packages.
  * - [DESTRUCTIVE] commands can delete or overwrite data and always require an
  *   explicit double confirmation, regardless of the security level.
+ * - [EXTERNAL] commands reach the outside world or cost money (SMS, calls, uploads, running
+ *   downloaded scripts) and always require approval, regardless of the security level.
+ *
+ * The names are persisted - do not rename.
  */
-enum class CommandRisk { READ_ONLY, WRITE, DESTRUCTIVE }
+enum class CommandRisk { READ_ONLY, WRITE, DESTRUCTIVE, EXTERNAL }
 
 enum class RejectReason {
     EMPTY,
@@ -19,6 +23,12 @@ enum class RejectReason {
     FORBIDDEN_ARGUMENT,
     FORBIDDEN_SUBCOMMAND,
     PATH_TRAVERSAL,
+    /** Catastrophic operation (root, formatting, wiping home/system folders): never executed. */
+    HARD_BLOCKED,
+    INVALID_PATH,
+    INVALID_URL,
+    /** Security level 3 forbids every action. */
+    SANDBOX,
 }
 
 sealed class ValidationResult {

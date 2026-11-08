@@ -29,15 +29,17 @@ data class ChatEntry(
     val command: String? = null,
     val status: CommandStatus? = null,
     val risk: CommandRisk? = null,
+    val tool: AgentTool? = null,
 )
 
 data class PendingApproval(
     val entryId: Long,
     val command: String,
-    val allowed: ValidationResult.Allowed,
+    val prepared: PreparedAction,
+    val risk: CommandRisk,
     val step: Int,
 ) {
-    val isDestructive: Boolean get() = allowed.risk == CommandRisk.DESTRUCTIVE
+    val isDestructive: Boolean get() = risk == CommandRisk.DESTRUCTIVE
 }
 
 data class ChatUiState(
@@ -55,6 +57,9 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val history = mutableListOf<LlmMessage>()
     private var nextId = 1L
     private var job: Job? = null
+
+    /** Set once untrusted web content entered the current task (reset by the next user message). */
+    private var untrustedContext = false
 
     private val _state = MutableStateFlow(ChatUiState())
     val state: StateFlow<ChatUiState> = _state.asStateFlow()
@@ -81,6 +86,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         if (message.isEmpty() || _state.value.isBusy) return
         addEntry(EntryKind.USER, message)
         history += LlmMessage(ChatRole.USER, message)
+        untrustedContext = false
         persist()
         job = viewModelScope.launch { agentTurn(step = 0) }
     }
@@ -114,13 +120,15 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     fun approvePending() {
         val pending = _state.value.pendingApproval ?: return
         _state.update { it.copy(pendingApproval = null) }
-        job = viewModelScope.launch { execute(pending.entryId, pending.command, pending.allowed, pending.step) }
+        settings.appendAudit("APPROVED", pending.command)
+        job = viewModelScope.launch { execute(pending.entryId, pending.command, pending.prepared, pending.step) }
     }
 
     fun denyPending() {
         val pending = _state.value.pendingApproval ?: return
         updateEntry(pending.entryId) { it.copy(status = CommandStatus.BLOCKED, text = t("cmd_blocked_by_user")) }
         history += LlmMessage(ChatRole.USER, AgentProtocol.formatRejected(pending.command, "the user blocked it"))
+        settings.appendAudit("DENIED", pending.command)
         _state.update { it.copy(pendingApproval = null, isBusy = false) }
         persist()
     }
@@ -138,7 +146,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         val reply = try {
             val client = LlmClientFactory.create(settings, provider)
             client.complete(
-                AgentProtocol.systemPrompt(settings.getSecurityLevel(), settings.getLanguage()),
+                AgentProtocol.systemPrompt(settings.getSecurityLevel(), settings.getLanguage(), settings.getMaxSteps()),
                 AgentProtocol.prepareHistory(history),
             )
         } catch (e: CancellationException) {
@@ -157,54 +165,85 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         if (parsed.text.isNotBlank()) addEntry(EntryKind.ASSISTANT, parsed.text)
         persist()
 
-        val command = parsed.command
-        if (command == null) {
+        val action = parsed.action
+        if (action == null) {
             _state.update { it.copy(isBusy = false) }
             return
         }
-        handleCommand(command, step)
+        handleAction(action, step)
     }
 
-    private suspend fun handleCommand(command: String, step: Int) {
+    private suspend fun handleAction(action: AgentAction, step: Int) {
         val level = settings.getSecurityLevel()
-        if (level == 3) {
-            addCommandEntry(command, CommandStatus.BLOCKED, t("sandbox_blocked"))
-            history += LlmMessage(ChatRole.USER, AgentProtocol.formatRejected(command, "security level 3 forbids commands"))
-            _state.update { it.copy(isBusy = false) }
-            persist()
-            return
-        }
-
-        when (val validation = CommandValidator.validate(command)) {
-            is ValidationResult.Rejected -> {
-                val reason = rejectText(validation)
-                addCommandEntry(command, CommandStatus.BLOCKED, reason)
+        when (val check = ActionValidator.validate(action, level)) {
+            is ActionCheck.Rejected -> {
+                val reason = rejectText(check.reason, check.detail)
+                addCommandEntry(check.display, CommandStatus.BLOCKED, reason, tool = toolOf(action))
                 history += LlmMessage(
                     ChatRole.USER,
-                    AgentProtocol.formatRejected(command, "${validation.reason} ${validation.detail}".trim()),
+                    AgentProtocol.formatRejected(check.display, "${check.reason} ${check.detail}".trim()),
                 )
+                settings.appendAudit("BLOCKED", "${check.display} (${check.reason} ${check.detail})".trim())
                 persist()
-                // Let the model correct itself (bounded by the step limit).
-                continueOrFinish(step)
+                if (check.reason == RejectReason.SANDBOX) {
+                    _state.update { it.copy(isBusy = false) }
+                } else {
+                    // Let the model correct itself (bounded by the step limit).
+                    continueOrFinish(step)
+                }
             }
-            is ValidationResult.Allowed -> {
-                val needsApproval = level == 2 || validation.risk == CommandRisk.DESTRUCTIVE
-                if (needsApproval) {
-                    val id = addCommandEntry(command, CommandStatus.PENDING_APPROVAL, t("cmd_waiting"), validation.risk)
-                    _state.update { it.copy(pendingApproval = PendingApproval(id, command, validation, step), isBusy = true) }
+            is ActionCheck.Ok -> {
+                val tool = toolOf(action)
+                val decision = AutonomyPolicy.decide(level, check.risk, action is AgentAction.Fetch, untrustedContext)
+                if (decision == AutonomyPolicy.Decision.ASK) {
+                    val id = addCommandEntry(check.display, CommandStatus.PENDING_APPROVAL, t("cmd_waiting"), check.risk, tool)
+                    _state.update {
+                        it.copy(pendingApproval = PendingApproval(id, check.display, check.prepared, check.risk, step), isBusy = true)
+                    }
                     persist()
                 } else {
-                    val id = addCommandEntry(command, CommandStatus.RUNNING, t("cmd_running"), validation.risk)
-                    execute(id, command, validation, step)
+                    val id = addCommandEntry(check.display, CommandStatus.RUNNING, t("cmd_running"), check.risk, tool)
+                    settings.appendAudit("AUTO", check.display)
+                    execute(id, check.display, check.prepared, step)
                 }
             }
         }
     }
 
-    private suspend fun execute(entryId: Long, command: String, allowed: ValidationResult.Allowed, step: Int) {
+    private fun toolOf(action: AgentAction) = when (action) {
+        is AgentAction.Shell -> AgentTool.TERMUX
+        is AgentAction.WriteFile -> AgentTool.FILE
+        is AgentAction.Fetch -> AgentTool.WEB
+    }
+
+    private suspend fun execute(entryId: Long, display: String, prepared: PreparedAction, step: Int) {
         _state.update { it.copy(isBusy = true) }
         updateEntry(entryId) { it.copy(status = CommandStatus.RUNNING, text = t("cmd_running")) }
+        when (prepared) {
+            is PreparedAction.Fetch -> fetch(entryId, prepared.url)
+            is PreparedAction.Termux -> if (!runTermux(entryId, display, prepared)) return
+        }
+        persist()
+        continueOrFinish(step)
+    }
 
+    private suspend fun fetch(entryId: Long, url: String) {
+        val result = WebTool.fetch(url)
+        untrustedContext = true
+        val display = if (result.error != null) {
+            t("web_failed") + result.error
+        } else {
+            "HTTP ${result.status}\n" + AgentProtocol.truncate(result.text.ifBlank { t("no_output") }, 600)
+        }
+        updateEntry(entryId) {
+            it.copy(status = if (result.isSuccess) CommandStatus.DONE else CommandStatus.FAILED, text = display)
+        }
+        settings.appendAudit(if (result.isSuccess) "DONE" else "FAILED", "fetch $url -> ${result.status ?: result.error}")
+        history += LlmMessage(ChatRole.USER, AgentProtocol.formatFetchResult(result))
+    }
+
+    /** Runs a Termux action. Returns `false` if the agent loop has to stop (Termux unreachable). */
+    private suspend fun runTermux(entryId: Long, display: String, prepared: PreparedAction.Termux): Boolean {
         val executionId = TermuxResultHub.newExecutionId()
         val result = coroutineScope {
             // Subscribe before sending so a fast result cannot be missed.
@@ -213,7 +252,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     TermuxResultHub.results.first { it.executionId == executionId }
                 }
             }
-            val launch = TermuxBridge.execute(getApplication(), TermuxCommand.fromValidated(allowed), executionId)
+            val launch = TermuxBridge.execute(getApplication(), prepared.command, executionId)
             if (launch != TermuxLaunch.Sent) {
                 awaiting.cancel()
                 val reason = when (launch) {
@@ -223,37 +262,46 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     TermuxLaunch.Sent -> ""
                 }
                 updateEntry(entryId) { it.copy(status = CommandStatus.FAILED, text = reason) }
-                history += LlmMessage(ChatRole.USER, AgentProtocol.formatRejected(command, "Termux is not reachable"))
+                history += LlmMessage(ChatRole.USER, AgentProtocol.formatRejected(display, "Termux is not reachable"))
+                settings.appendAudit("FAILED", "$display (Termux not reachable)")
                 _state.update { it.copy(isBusy = false) }
                 persist()
                 return@coroutineScope null
             }
             awaiting.await() ?: run {
                 updateEntry(entryId) { it.copy(status = CommandStatus.FAILED, text = t("err_termux_timeout")) }
-                history += LlmMessage(ChatRole.USER, AgentProtocol.formatRejected(command, "no result from Termux (timeout)"))
+                history += LlmMessage(ChatRole.USER, AgentProtocol.formatRejected(display, "no result from Termux (timeout)"))
+                settings.appendAudit("FAILED", "$display (timeout)")
                 _state.update { it.copy(isBusy = false) }
                 persist()
                 null
             }
-        } ?: return
+        } ?: return false
 
-        val display = when {
+        val shown = when {
             !result.started -> t("err_termux_start") + (result.errMessage ?: "")
+            prepared.tool == AgentTool.FILE && result.isSuccess -> t("file_written")
             else -> buildString {
                 append(AgentProtocol.truncate(result.stdout.ifBlank { result.stderr }.ifBlank { t("no_output") }, 2_000))
                 if (result.exitCode != null && result.exitCode != 0) append("\n\nexit ${result.exitCode}")
             }
         }
         updateEntry(entryId) {
-            it.copy(status = if (result.isSuccess) CommandStatus.DONE else CommandStatus.FAILED, text = display)
+            it.copy(status = if (result.isSuccess) CommandStatus.DONE else CommandStatus.FAILED, text = shown)
         }
-        history += LlmMessage(ChatRole.USER, AgentProtocol.formatResult(command, result))
-        persist()
-        continueOrFinish(step)
+        settings.appendAudit(if (result.isSuccess) "DONE" else "FAILED", "$display (exit ${result.exitCode ?: result.errCode})")
+        val feedback = if (prepared.tool == AgentTool.FILE) {
+            val path = prepared.command.arguments.last()
+            AgentProtocol.formatWriteResult(path, prepared.command.stdin?.length ?: 0, result)
+        } else {
+            AgentProtocol.formatResult(display, result)
+        }
+        history += LlmMessage(ChatRole.USER, feedback)
+        return true
     }
 
     private suspend fun continueOrFinish(step: Int) {
-        if (step + 1 < AgentProtocol.MAX_AUTONOMOUS_STEPS) {
+        if (step + 1 < settings.getMaxSteps()) {
             agentTurn(step + 1)
         } else {
             addEntry(EntryKind.INFO, t("step_limit"))
@@ -279,15 +327,19 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         return if (detail != null) "$base\n($detail)" else base
     }
 
-    private fun rejectText(r: ValidationResult.Rejected): String {
-        val key = when (r.reason) {
+    private fun rejectText(reason: RejectReason, detail: String): String {
+        val key = when (reason) {
             RejectReason.NOT_WHITELISTED -> "rej_not_whitelisted"
             RejectReason.SHELL_OPERATOR -> "rej_shell_operator"
             RejectReason.PATH_TRAVERSAL -> "rej_path"
             RejectReason.FORBIDDEN_ARGUMENT, RejectReason.FORBIDDEN_SUBCOMMAND -> "rej_argument"
+            RejectReason.HARD_BLOCKED -> "rej_hard_blocked"
+            RejectReason.INVALID_PATH -> "rej_invalid_path"
+            RejectReason.INVALID_URL -> "rej_invalid_url"
+            RejectReason.SANDBOX -> "sandbox_blocked"
             else -> "security_block"
         }
-        return if (r.detail.isNotBlank()) "${t(key)} (${r.detail})" else t(key)
+        return if (detail.isNotBlank()) "${t(key)} ($detail)" else t(key)
     }
 
     // --- State helpers --------------------------------------------------------------------
@@ -298,9 +350,15 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         return id
     }
 
-    private fun addCommandEntry(command: String, status: CommandStatus, text: String, risk: CommandRisk? = null): Long {
+    private fun addCommandEntry(
+        command: String,
+        status: CommandStatus,
+        text: String,
+        risk: CommandRisk? = null,
+        tool: AgentTool? = null,
+    ): Long {
         val id = nextId++
-        val entry = ChatEntry(id, EntryKind.COMMAND, text, command, status, risk)
+        val entry = ChatEntry(id, EntryKind.COMMAND, text, command, status, risk, tool)
         _state.update { it.copy(entries = (it.entries + entry).takeLast(MAX_ENTRIES)) }
         return id
     }
@@ -325,6 +383,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     }
                     status?.let { put("status", it.name) }
                     e.risk?.let { put("risk", it.name) }
+                    e.tool?.let { put("tool", it.name) }
                 })
             }
         })
@@ -350,6 +409,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     command = o.optString("command").takeIf { o.has("command") },
                     status = o.optString("status").takeIf { o.has("status") }?.let { CommandStatus.valueOf(it) },
                     risk = o.optString("risk").takeIf { o.has("risk") }?.let { CommandRisk.valueOf(it) },
+                    tool = o.optString("tool").takeIf { o.has("tool") }?.let { AgentTool.valueOf(it) },
                 )
             }
             val messages = json.optJSONArray("history") ?: JSONArray()
